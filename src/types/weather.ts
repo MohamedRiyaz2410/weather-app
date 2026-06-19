@@ -4,3 +4,12 @@ export interface WeatherData {
   humidity: number;
   windSpeed: number;
 }
+
+export interface LocationSuggestion {
+  id: number;
+  name: string;
+  country: string;
+  admin1?: string;
+  latitude: number;
+  longitude: number;
+}

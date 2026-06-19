@@ -1,7 +1,14 @@
+import type { LocationSuggestion } from "../types/Weather";
+
+const GEOCODING_URL =
+  "https://geocoding-api.open-meteo.com/v1/search";
+const FORECAST_URL =
+  "https://api.open-meteo.com/v1/forecast";
+
 export const getWeather = async (city: string) => {
   // Step 1: Get coordinates from city name
   const geoResponse = await fetch(
-    `https://geocoding-api.open-meteo.com/v1/search?name=${city}&count=1`
+    `${GEOCODING_URL}?name=${encodeURIComponent(city)}&count=1`
   );
 
   const geoData = await geoResponse.json();
@@ -13,9 +20,27 @@ export const getWeather = async (city: string) => {
   const { latitude, longitude, name, country } =
     geoData.results[0];
 
-  // Step 2: Get weather
+  return getWeatherByLocation({
+    latitude,
+    longitude,
+    name,
+    country,
+  });
+};
+
+export const getWeatherByLocation = async ({
+  latitude,
+  longitude,
+  name,
+  country,
+}: {
+  latitude: number;
+  longitude: number;
+  name: string;
+  country: string;
+}) => {
   const weatherResponse = await fetch(
-    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`
+    `${FORECAST_URL}?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,wind_speed_10m`
   );
 
   const weatherData = await weatherResponse.json();
@@ -29,4 +54,20 @@ export const getWeather = async (city: string) => {
     windSpeed:
       weatherData.current.wind_speed_10m,
   };
+};
+
+export const getLocationSuggestions = async (
+  city: string
+): Promise<LocationSuggestion[]> => {
+  if (city.trim().length < 2) {
+    return [];
+  }
+
+  const response = await fetch(
+    `${GEOCODING_URL}?name=${encodeURIComponent(city)}&count=5`
+  );
+
+  const data = await response.json();
+
+  return data.results ?? [];
 };

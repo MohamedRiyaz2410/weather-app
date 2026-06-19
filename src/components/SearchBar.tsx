@@ -1,30 +1,101 @@
+import type { LocationSuggestion } from "../types/Weather";
+
 interface Props {
   city: string;
   setCity: (city: string) => void;
   searchWeather: () => void;
+  suggestions: LocationSuggestion[];
+  suggestionsLoading: boolean;
+  selectSuggestion: (suggestion: LocationSuggestion) => void;
+  isDark: boolean;
 }
 
 function SearchBar({
   city,
   setCity,
   searchWeather,
+  suggestions,
+  suggestionsLoading,
+  selectSuggestion,
+  isDark,
 }: Props) {
-  return (
-    <div className="flex gap-2">
-      <input
-        type="text"
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-        placeholder="Enter city"
-        className="flex-1 border rounded-lg p-3"
-      />
+  const showSuggestions =
+    suggestionsLoading || suggestions.length > 0;
 
-      <button
-        onClick={searchWeather}
-        className="bg-blue-600 text-white px-4 rounded-lg"
-      >
-        Search
-      </button>
+  return (
+    <div className="relative">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              searchWeather();
+            }
+          }}
+          placeholder="Enter city"
+          className={`flex-1 rounded-lg border p-3 outline-none transition-colors focus:ring-2 focus:ring-sky-400 ${
+            isDark
+              ? "border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500"
+              : "border-slate-200 bg-white text-slate-900 placeholder:text-slate-400"
+          }`}
+        />
+
+        <button
+          onClick={searchWeather}
+          className="rounded-lg bg-sky-600 px-4 font-medium text-white transition-colors hover:bg-sky-700"
+        >
+          Search
+        </button>
+      </div>
+
+      {showSuggestions && (
+        <div
+          className={`absolute left-0 right-[88px] top-14 z-10 overflow-hidden rounded-lg border shadow-lg ${
+            isDark
+              ? "border-slate-700 bg-slate-900"
+              : "border-slate-200 bg-white"
+          }`}
+        >
+          {suggestionsLoading && (
+            <div
+              className={`p-3 text-sm ${
+                isDark ? "text-slate-400" : "text-slate-500"
+              }`}
+            >
+              Finding places...
+            </div>
+          )}
+
+          {!suggestionsLoading &&
+            suggestions.map((suggestion) => (
+              <button
+                key={suggestion.id}
+                type="button"
+                onClick={() => selectSuggestion(suggestion)}
+                className={`block w-full px-3 py-2 text-left transition-colors ${
+                  isDark
+                    ? "text-slate-100 hover:bg-slate-800"
+                    : "text-slate-900 hover:bg-sky-50"
+                }`}
+              >
+                <span className="block font-medium">
+                  {suggestion.name}
+                </span>
+                <span
+                  className={`block text-sm ${
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  }`}
+                >
+                  {[suggestion.admin1, suggestion.country]
+                    .filter(Boolean)
+                    .join(", ")}
+                </span>
+              </button>
+            ))}
+        </div>
+      )}
     </div>
   );
 }
