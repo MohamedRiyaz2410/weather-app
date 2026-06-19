@@ -33,25 +33,31 @@ function WeatherCard({ weather, isDark }: Props) {
               {weather.city}
             </h2>
             <p
-              className={`mt-2 text-base ${
+              className={`mt-2 text-base flex items-center gap-2 ${
                 isDark ? "text-slate-300" : "text-slate-500"
               }`}
             >
+              <span className="text-2xl">{weather.conditionEmoji}</span>
               {weather.condition}
             </p>
           </div>
 
-          <div className="text-left sm:text-right">
-            <p className="text-7xl font-black tracking-normal text-sky-500">
-              {Math.round(weather.temperature)}°
-            </p>
-            <p
-              className={`mt-1 text-sm ${
-                isDark ? "text-slate-300" : "text-slate-500"
-              }`}
-            >
-              Feels like {Math.round(weather.apparentTemperature)}°C
-            </p>
+          <div className="flex items-center gap-4 sm:flex-col sm:items-end">
+            <span className="text-6xl" role="img" aria-label={weather.condition}>
+              {weather.conditionEmoji}
+            </span>
+            <div className="text-left sm:text-right">
+              <p className="text-7xl font-black tracking-normal text-sky-500">
+                {Math.round(weather.temperature)}°
+              </p>
+              <p
+                className={`mt-1 text-sm ${
+                  isDark ? "text-slate-300" : "text-slate-500"
+                }`}
+              >
+                Feels like {Math.round(weather.apparentTemperature)}°C
+              </p>
+            </div>
           </div>
         </div>
 
@@ -118,7 +124,7 @@ function WeatherCard({ weather, isDark }: Props) {
           {weather.daily.map((day) => (
             <div
               key={day.date}
-              className={`grid grid-cols-[48px_1fr_auto] items-center gap-3 rounded-2xl p-3 ${
+              className={`grid grid-cols-[48px_auto_1fr_auto] items-center gap-3 rounded-2xl p-3 ${
                 isDark
                   ? "bg-white/[0.06]"
                   : "bg-slate-50"
@@ -126,6 +132,9 @@ function WeatherCard({ weather, isDark }: Props) {
             >
               <span className="text-sm font-bold">
                 {formatDay(day.date)}
+              </span>
+              <span className="text-xl w-6 text-center" role="img" aria-label={day.condition}>
+                {day.conditionEmoji}
               </span>
               <div>
                 <p className="text-sm font-semibold">

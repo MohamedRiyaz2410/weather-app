@@ -13,14 +13,17 @@ import {
   getLocationSuggestions,
   getWeather,
   getWeatherByLocation,
+  getCityNameFromCoords,
+  getWeatherBackground,
 } from "./services/WeatherApi";
 
 function App() {
   const [city, setCity] = useState("");
   const [weather, setWeather] =
     useState<WeatherData | null>(null);
-  const [isDark, setIsDark] =
-    useState(false);
+  const [isDark, setIsDark] = useState(
+    () => window.matchMedia("(prefers-color-scheme: dark)").matches
+  );
 
   const [loading, setLoading] =
     useState(false);
@@ -34,6 +37,18 @@ function App() {
   const [selectedLocation, setSelectedLocation] =
     useState<LocationSuggestion | null>(null);
 
+  // Sync and listen to system theme changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const handler = (e: MediaQueryListEvent) => {
+      setIsDark(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handler);
+    return () => mediaQuery.removeEventListener("change", handler);
+  }, []);
+
   useEffect(() => {
     const trimmedCity = city.trim();
 
@@ -41,21 +56,31 @@ function App() {
       return;
     }
 
+    const controller = new AbortController();
+
     const timeoutId = window.setTimeout(async () => {
       try {
         setSuggestionsLoading(true);
 
-        const data = await getLocationSuggestions(trimmedCity);
+        const data = await getLocationSuggestions(trimmedCity, controller.signal);
 
         setSuggestions(data);
-      } catch {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name === "AbortError") {
+          return;
+        }
         setSuggestions([]);
       } finally {
-        setSuggestionsLoading(false);
+        if (!controller.signal.aborted) {
+          setSuggestionsLoading(false);
+        }
       }
     }, 300);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
   }, [city]);
 
   const searchWeather = async () => {
@@ -84,7 +109,8 @@ function App() {
   ) => {
     const location = [
       suggestion.name,
-      suggestion.admin1,
+      suggestion.admin2 && suggestion.admin2 !== suggestion.name ? suggestion.admin2 : undefined,
+      suggestion.admin1 && suggestion.admin1 !== (suggestion.admin2 || suggestion.name) ? suggestion.admin1 : undefined,
       suggestion.country,
     ]
       .filter(Boolean)
@@ -93,6 +119,53 @@ function App() {
     setCity(location);
     setSelectedLocation(suggestion);
     setSuggestions([]);
+  };
+
+  const fetchWeatherForCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      setError("Geolocation is not supported by your browser");
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setSuggestions([]);
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        try {
+          const { latitude, longitude } = position.coords;
+          const { name, country } = await getCityNameFromCoords(latitude, longitude);
+
+          const data = await getWeatherByLocation({
+            latitude,
+            longitude,
+            name,
+            country,
+          });
+
+          const locationDescription = [name, country].filter(Boolean).join(", ");
+          setCity(locationDescription);
+          setSelectedLocation({
+            id: 0,
+            name,
+            country,
+            latitude,
+            longitude,
+          });
+          setWeather(data);
+        } catch {
+          setError("Failed to fetch weather for your location");
+          setWeather(null);
+        } finally {
+          setLoading(false);
+        }
+      },
+      (err) => {
+        setError(err.message || "Failed to retrieve location");
+        setLoading(false);
+      }
+    );
   };
 
   const updateCity = (value: string) => {
@@ -104,20 +177,14 @@ function App() {
     }
   };
 
+  const bgTheme = getWeatherBackground(weather ? weather.weatherCode : null, isDark);
+
   return (
     <div
-      className={`min-h-screen overflow-hidden transition-colors duration-300 ${
-        isDark
-          ? "bg-slate-950 text-slate-100"
-          : "bg-[#eef7fb] text-slate-950"
-      }`}
+      className={`min-h-screen overflow-hidden transition-colors duration-500 ${bgTheme.containerClass}`}
     >
       <div
-        className={`pointer-events-none fixed inset-0 ${
-          isDark
-            ? "bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.28),_transparent_34%),radial-gradient(circle_at_75%_15%,_rgba(244,114,182,0.18),_transparent_28%)]"
-            : "bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.28),_transparent_34%),radial-gradient(circle_at_82%_18%,_rgba(251,191,36,0.18),_transparent_30%)]"
-        }`}
+        className={`pointer-events-none fixed inset-0 transition-all duration-700 ${bgTheme.overlayClass}`}
       />
 
       <button
@@ -159,6 +226,8 @@ function App() {
             suggestionsLoading={suggestionsLoading}
             selectSuggestion={selectSuggestion}
             isDark={isDark}
+            clearSuggestions={() => setSuggestions([])}
+            fetchCurrentLocationWeather={fetchWeatherForCurrentLocation}
           />
 
           {loading && <Loading isDark={isDark} />}

@@ -10,6 +10,7 @@ export interface WeatherData {
   cloudCover: number;
   weatherCode: number;
   condition: string;
+  conditionEmoji: string;
   time: string;
   daily: DailyWeather[];
 }
@@ -17,6 +18,7 @@ export interface WeatherData {
 export interface DailyWeather {
   date: string;
   condition: string;
+  conditionEmoji: string;
   weatherCode: number;
   maxTemperature: number;
   minTemperature: number;
@@ -29,6 +31,7 @@ export interface LocationSuggestion {
   name: string;
   country: string;
   admin1?: string;
+  admin2?: string;
   latitude: number;
   longitude: number;
 }
