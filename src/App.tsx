@@ -106,20 +106,28 @@ function App() {
 
   return (
     <div
-      className={`min-h-screen flex justify-center items-center p-4 transition-colors duration-300 ${
+      className={`min-h-screen overflow-hidden transition-colors duration-300 ${
         isDark
           ? "bg-slate-950 text-slate-100"
-          : "bg-sky-50 text-slate-900"
+          : "bg-[#eef7fb] text-slate-950"
       }`}
     >
+      <div
+        className={`pointer-events-none fixed inset-0 ${
+          isDark
+            ? "bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.28),_transparent_34%),radial-gradient(circle_at_75%_15%,_rgba(244,114,182,0.18),_transparent_28%)]"
+            : "bg-[radial-gradient(circle_at_top_left,_rgba(56,189,248,0.28),_transparent_34%),radial-gradient(circle_at_82%_18%,_rgba(251,191,36,0.18),_transparent_30%)]"
+        }`}
+      />
+
       <button
         type="button"
         onClick={() => setIsDark((current) => !current)}
         aria-label={`Switch to ${isDark ? "light" : "dark"} theme`}
-        className={`fixed right-4 top-4 flex h-10 w-20 items-center rounded-full p-1 shadow-lg transition-colors duration-300 ${
+        className={`fixed right-4 top-4 z-20 flex h-10 w-20 items-center rounded-full p-1 shadow-lg transition-colors duration-300 ${
           isDark
-            ? "bg-slate-800"
-            : "bg-white"
+            ? "bg-slate-800/90 ring-1 ring-white/10"
+            : "bg-white/90 ring-1 ring-slate-200"
         }`}
       >
         <span
@@ -133,34 +141,60 @@ function App() {
         </span>
       </button>
 
-      <div className="max-w-md w-full">
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-4 py-20 sm:px-6">
         <Header isDark={isDark} />
 
-        <SearchBar
-          city={city}
-          setCity={updateCity}
-          searchWeather={searchWeather}
-          suggestions={suggestions}
-          suggestionsLoading={suggestionsLoading}
-          selectSuggestion={selectSuggestion}
-          isDark={isDark}
-        />
-
-        {loading && <Loading isDark={isDark} />}
-
-        {error && (
-          <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-red-500">
-            {error}
-          </p>
-        )}
-
-        {weather && (
-          <WeatherCard
-            weather={weather}
+        <section
+          className={`mt-8 rounded-[2rem] border p-4 shadow-2xl backdrop-blur-xl sm:p-6 ${
+            isDark
+              ? "border-white/10 bg-white/[0.06] shadow-black/40"
+              : "border-white/70 bg-white/70 shadow-sky-200/60"
+          }`}
+        >
+          <SearchBar
+            city={city}
+            setCity={updateCity}
+            searchWeather={searchWeather}
+            suggestions={suggestions}
+            suggestionsLoading={suggestionsLoading}
+            selectSuggestion={selectSuggestion}
             isDark={isDark}
           />
-        )}
-      </div>
+
+          {loading && <Loading isDark={isDark} />}
+
+          {error && (
+            <p className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 p-4 text-sm font-medium text-red-500">
+              {error}
+            </p>
+          )}
+
+          {weather ? (
+            <WeatherCard
+              weather={weather}
+              isDark={isDark}
+            />
+          ) : (
+            !loading &&
+            !error && (
+              <div
+                className={`mt-8 rounded-3xl border p-8 text-center ${
+                  isDark
+                    ? "border-white/10 bg-slate-950/40 text-slate-300"
+                    : "border-slate-200 bg-white/60 text-slate-600"
+                }`}
+              >
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-sky-500">
+                  Ready for forecast
+                </p>
+                <p className="mt-3 text-lg">
+                  Search a city to see live conditions and the week ahead.
+                </p>
+              </div>
+            )
+          )}
+        </section>
+      </main>
     </div>
   );
 }
