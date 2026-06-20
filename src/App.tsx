@@ -208,7 +208,7 @@ function App() {
         </span>
       </button>
 
-      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-4 py-20 sm:px-6">
+      <main className="relative z-10 mx-auto flex min-h-screen w-full max-w-6xl flex-col justify-center px-4 py-8 sm:py-16 md:py-20 sm:px-6">
         <Header isDark={isDark} />
 
         <section

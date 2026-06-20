@@ -124,6 +124,69 @@ function SearchBar({
               <path strokeLinecap="round" d="M12 2v2M12 20v2M2 12h2M20 12h2" />
             </svg>
           </button>
+
+          {showSuggestions && (
+            <div
+              id="search-suggestions-list"
+              role="listbox"
+              aria-label="Location suggestions"
+              className={`absolute left-0 right-0 top-full z-20 mt-2 overflow-hidden rounded-2xl border shadow-lg ${
+                isDark
+                  ? "border-slate-700 bg-slate-900"
+                  : "border-slate-200 bg-white"
+              }`}
+            >
+              {suggestionsLoading && (
+                <div
+                  className={`p-3 text-sm ${
+                    isDark ? "text-slate-400" : "text-slate-500"
+                  }`}
+                >
+                  Finding places...
+                </div>
+              )}
+
+              {!suggestionsLoading &&
+                suggestions.map((suggestion, index) => {
+                  const isHighlighted = index === focusedIndex;
+                  return (
+                    <button
+                      key={suggestion.id}
+                      type="button"
+                      role="option"
+                      aria-selected={isHighlighted}
+                      onClick={() => selectSuggestion(suggestion)}
+                      className={`block w-full px-4 py-3 text-left transition-colors ${
+                        isHighlighted
+                          ? isDark
+                            ? "bg-slate-800 text-slate-100"
+                            : "bg-sky-100 text-slate-900"
+                          : isDark
+                          ? "text-slate-100 hover:bg-slate-800/50"
+                          : "text-slate-900 hover:bg-sky-50"
+                      }`}
+                    >
+                      <span className="block font-medium">
+                        {suggestion.name}
+                      </span>
+                      <span
+                        className={`block text-sm ${
+                          isDark ? "text-slate-400" : "text-slate-500"
+                        }`}
+                      >
+                        {[
+                          suggestion.admin2 && suggestion.admin2 !== suggestion.name ? suggestion.admin2 : undefined,
+                          suggestion.admin1 && suggestion.admin1 !== (suggestion.admin2 || suggestion.name) ? suggestion.admin1 : undefined,
+                          suggestion.country,
+                        ]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </span>
+                    </button>
+                  );
+                })}
+            </div>
+          )}
         </div>
 
         <button
@@ -134,69 +197,6 @@ function SearchBar({
           Search
         </button>
       </div>
-
-      {showSuggestions && (
-        <div
-          id="search-suggestions-list"
-          role="listbox"
-          aria-label="Location suggestions"
-          className={`absolute left-0 right-0 top-full z-10 mt-2 overflow-hidden rounded-2xl border shadow-lg ${
-            isDark
-              ? "border-slate-700 bg-slate-900"
-              : "border-slate-200 bg-white"
-          }`}
-        >
-          {suggestionsLoading && (
-            <div
-              className={`p-3 text-sm ${
-                isDark ? "text-slate-400" : "text-slate-500"
-              }`}
-            >
-              Finding places...
-            </div>
-          )}
-
-          {!suggestionsLoading &&
-            suggestions.map((suggestion, index) => {
-              const isHighlighted = index === focusedIndex;
-              return (
-                <button
-                  key={suggestion.id}
-                  type="button"
-                  role="option"
-                  aria-selected={isHighlighted}
-                  onClick={() => selectSuggestion(suggestion)}
-                  className={`block w-full px-4 py-3 text-left transition-colors ${
-                    isHighlighted
-                      ? isDark
-                        ? "bg-slate-800 text-slate-100"
-                        : "bg-sky-100 text-slate-900"
-                      : isDark
-                      ? "text-slate-100 hover:bg-slate-800/50"
-                      : "text-slate-900 hover:bg-sky-50"
-                  }`}
-                >
-                  <span className="block font-medium">
-                    {suggestion.name}
-                  </span>
-                  <span
-                    className={`block text-sm ${
-                      isDark ? "text-slate-400" : "text-slate-500"
-                    }`}
-                  >
-                    {[
-                      suggestion.admin2 && suggestion.admin2 !== suggestion.name ? suggestion.admin2 : undefined,
-                      suggestion.admin1 && suggestion.admin1 !== (suggestion.admin2 || suggestion.name) ? suggestion.admin1 : undefined,
-                      suggestion.country,
-                    ]
-                      .filter(Boolean)
-                      .join(", ")}
-                  </span>
-                </button>
-              );
-            })}
-        </div>
-      )}
     </div>
   );
 }

@@ -13,7 +13,7 @@ function Header({ isDark }: Props) {
         Atmosphere
       </p>
       <h1
-        className={`mt-3 text-4xl font-black leading-tight sm:text-6xl ${
+        className={`mt-3 text-3xl sm:text-5xl md:text-6xl font-black leading-tight ${
           isDark ? "text-white" : "text-slate-950"
         }`}
       >

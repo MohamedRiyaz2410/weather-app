@@ -14,7 +14,7 @@ function WeatherCard({ weather, isDark }: Props) {
   return (
     <div className="mt-6 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
       <section
-        className={`rounded-[1.75rem] border p-6 shadow-xl ${
+        className={`rounded-[1.75rem] border p-5 sm:p-6 shadow-xl ${
           isDark
             ? "border-white/10 bg-slate-950/60 shadow-black/30"
             : "border-white bg-white shadow-sky-200/50"
@@ -29,7 +29,7 @@ function WeatherCard({ weather, isDark }: Props) {
             >
               Current weather
             </p>
-            <h2 className="mt-2 text-3xl font-black">
+            <h2 className="mt-2 text-2xl sm:text-3xl font-black">
               {weather.city}
             </h2>
             <p
@@ -47,7 +47,7 @@ function WeatherCard({ weather, isDark }: Props) {
               {weather.conditionEmoji}
             </span>
             <div className="text-left sm:text-right">
-              <p className="text-7xl font-black tracking-normal text-sky-500">
+              <p className="text-6xl sm:text-7xl font-black tracking-normal text-sky-500">
                 {Math.round(weather.temperature)}°
               </p>
               <p
@@ -124,7 +124,7 @@ function WeatherCard({ weather, isDark }: Props) {
           {weather.daily.map((day) => (
             <div
               key={day.date}
-              className={`grid grid-cols-[48px_auto_1fr_auto] items-center gap-3 rounded-2xl p-3 ${
+              className={`grid grid-cols-[40px_auto_1fr_auto] sm:grid-cols-[48px_auto_1fr_auto] items-center gap-2 sm:gap-3 rounded-2xl p-2.5 sm:p-3 ${
                 isDark
                   ? "bg-white/[0.06]"
                   : "bg-slate-50"
@@ -141,14 +141,14 @@ function WeatherCard({ weather, isDark }: Props) {
                   {day.condition}
                 </p>
                 <p
-                  className={`text-xs ${
+                  className={`text-[11px] sm:text-xs ${
                     isDark ? "text-slate-400" : "text-slate-500"
                   }`}
                 >
                   Rain {day.precipitationChance}% · UV {Math.round(day.uvIndex)}
                 </p>
               </div>
-              <span className="text-sm font-black">
+              <span className="text-sm font-black text-right min-w-[55px]">
                 {Math.round(day.maxTemperature)}° / {Math.round(day.minTemperature)}°
               </span>
             </div>
